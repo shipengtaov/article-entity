@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import pytest
-from article_entity.article_entity import article_entity, _guess_contain, _keep_item
+from article_entity.article_entity import article_entity, _split_title, _guess_contain, _keep_item
 
 
 @pytest.mark.parametrize('title,content,expected', [
@@ -68,9 +68,37 @@ from article_entity.article_entity import article_entity, _guess_contain, _keep_
         ['苹果'],
     ),
 
+    (
+        '医疗健康领域共享社区Figure1完成B轮融资，被称为医生版Instagram',
+        """
+        医疗领域共享平台Figure1被称为医生版的Instagram，36氪获悉，成立四年的Figure1现在已经拥有超过200万注册用户，其中有一百多万医疗专家在Figure1上分享有关罕见病例、新型治疗方案的图片和文字信息。
+        医疗健康领域共享社区Figure1完成B轮融资，被称为医生版Instagram
+        医疗领域共享平台Figure1被称为医生版的Instagram，36氪获悉，成立四年的Figure1现在已经拥有超过200万注册用户，其中有一百多万医疗专家在Figure1上分享有关罕见病例、新型治疗方案的图片和文字信息。
+
+        Figure1从创立之初就颇受资本青睐，加上最近由Kensington Capital Partners领投的1000万美元的B轮融资，Figure1已累计获得超过两千万美元的融资。在国内，类似的社区平台“医学界”、“医生汇”等也相继获得融资，相信Figure1的发展模式和运营理念会给国内创业者带来一些启发。
+
+        虽然总部在加拿大多伦多，Figure1的会员却有三分之二来自美国，在拉丁美洲也有很大的用户量。作为专业型分享平台，Figure1也对医疗专家以外的普通用户开放，其中包括医学院学生以及医学门外汉，只不过非专业用户只能在平台上浏览信息而不能发言。
+
+        Figure1没有将平台定位于医疗健康领域中某个垂直细分场景，而在一开始就向整个医疗健康领域开放，这个策略现在看来卓有成效，来自医疗健康各领域的用户贡献着自己的内容，让平台自发而有机地成长。
+
+        和众多线上分享社区一样，如何鼓励用户发言也是Figure1需要应对的问题，对此，Figure1的总裁Gregory Levey 认为：“一个社区中只有少部分人发言其实很正常，Figure1不强求每个用户必须发言，只希望大家可以在平台上获得自己认为有价值的东西。”
+
+        同时，Figure1也在避免自己成为一个媒体，因为在Figure1看来，对于医疗健康领域来说，打造一个让用户自发分享、创造价值的可持续社区比做一个媒体更有价值。
+        """,
+        ['Figure1'],
+    ),
+
 ])
 def test_article_entity(title, content, expected):
     assert expected == article_entity(title, content)
+
+
+@pytest.mark.parametrize('title,expected', [
+    ('测试English Test', ['测', '试', 'English', ' ', 'Test']),
+    ('测试English2 Test', ['测', '试', 'English', '2', ' ', 'Test']),
+])
+def test_split_title(title, expected):
+    assert expected == _split_title(title)
 
 
 @pytest.mark.parametrize('key,dict,expected', [

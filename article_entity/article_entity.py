@@ -33,8 +33,9 @@ def article_entity(title, content, min_word_len=2, max_word_len=10, max_count=1)
     :param max_count: how many entities should we return
     """
     title = _force_text(title.strip())
+    title_list = _split_title(title)
     content = _force_text(content.strip())
-    title_length = len(title)
+    title_length = len(title_list)
     start = 0
     counter = defaultdict(int)
     while True:
@@ -42,8 +43,8 @@ def article_entity(title, content, min_word_len=2, max_word_len=10, max_count=1)
             break
 
         for end in range(start+1, title_length+1):
-            sub_title = title[start:end].strip()
-            next_title = title[start:end+1].strip()
+            sub_title = ''.join(title_list[start:end]).strip()
+            next_title = ''.join(title_list[start:end+1]).strip()
             if (not sub_title
                     or sub_title == title
                     or len(sub_title) > max_word_len
@@ -65,6 +66,30 @@ def article_entity(title, content, min_word_len=2, max_word_len=10, max_count=1)
     cleaned_counter = {k:v for k, v in counter.items() if _keep_item(k, counter)}
     sorted_counter = sorted(cleaned_counter.items(), key=lambda x: x[1], reverse=True)
     return[i[0] for i in sorted_counter[:max_count]]
+
+
+def _split_title(title):
+    """split title to list
+
+    similar to word-segment
+
+    :return: list
+    """
+    title_list = []
+    for i in title:
+        if not title_list:
+            title_list.append(i)
+            continue
+        # not english char
+        if not alpha_pattern.match(i):
+            title_list.append(i)
+        # english char
+        else:
+            if alpha_pattern.match(title_list[-1]):
+                title_list[-1] = ''.join([title_list[-1], i])
+            else:
+                title_list.append(i)
+    return title_list
 
 
 def _keep_item(key, dict):
